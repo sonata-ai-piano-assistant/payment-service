@@ -1,3 +1,4 @@
+require("dotenv").config()
 const {
   BASIC_SUBSCRIPTION_ID,
   PREMIUM_SUBSCRIPTION_ID,

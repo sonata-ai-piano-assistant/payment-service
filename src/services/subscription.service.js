@@ -14,14 +14,18 @@ module.exports = {
    */
   async createOrUpdateSubscription(subscriptionData) {
     try {
-      await fetch(`${DATABASE_SERVICE_URL}/api/subscriptions`, {
+      const response = await fetch(`${DATABASE_SERVICE_URL}/subscriptions`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
         body: JSON.stringify(subscriptionData)
       })
-      console.log("Subscription created/updated in DB")
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+      const data = await response.json()
+      console.log("Subscription saved in DB:", data)
     } catch (error) {
       console.error("Error saving subscription:", error.message)
     }

@@ -8,7 +8,7 @@ const stripe = Stripe(stripeConfig.STRIPE_SECRET_KEY)
  */
 module.exports = {
   async createCheckoutSession({ priceId, customerEmail, userId, plan }) {
-    return await stripe.checkout.sessions.create({
+    return stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
@@ -23,10 +23,10 @@ module.exports = {
   },
 
   async getInvoice(invoiceId) {
-    return await stripe.invoices.retrieve(invoiceId)
+    return stripe.invoices.retrieve(invoiceId)
   },
 
   async refundPayment(paymentIntentId) {
-    return await stripe.refunds.create({ payment_intent: paymentIntentId })
+    return stripe.refunds.create({ payment_intent: paymentIntentId })
   }
 }
