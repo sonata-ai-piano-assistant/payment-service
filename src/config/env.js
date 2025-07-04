@@ -1,7 +1,6 @@
-const { PORT, DATABASE_URI, AUTH_SERVICE_URL, DATABASE_SERVICE_URL } =
-  process.env
+const { PORT, AUTH_SERVICE_URL, DATABASE_SERVICE_URL } = process.env
 
-if (!PORT || !DATABASE_URI || !AUTH_SERVICE_URL || !DATABASE_SERVICE_URL) {
+if (!PORT || !AUTH_SERVICE_URL || !DATABASE_SERVICE_URL) {
   throw new Error("Missing environment variables")
 }
 
@@ -11,7 +10,6 @@ if (!PORT || !DATABASE_URI || !AUTH_SERVICE_URL || !DATABASE_SERVICE_URL) {
  */
 module.exports = {
   PORT: parseInt(PORT),
-  DATABASE_URI,
   AUTH_SERVICE_URL,
   DATABASE_SERVICE_URL
 }
