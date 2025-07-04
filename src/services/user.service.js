@@ -23,6 +23,8 @@ module.exports = {
       if (!response.ok) {
         throw new Error("Failed to verify token")
       }
+      const data = await response.json()
+      return data.user
     } catch (error) {
       throw new Error(`Error verifying token: ${error.message}`)
     }
