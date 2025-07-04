@@ -7,14 +7,18 @@ const stripe = Stripe(stripeConfig.STRIPE_SECRET_KEY)
  * @module services/stripe.service
  */
 module.exports = {
-  async createCheckoutSession({ priceId, customerEmail }) {
+  async createCheckoutSession({ priceId, customerEmail, userId, plan }) {
     return await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: customerEmail,
       success_url: stripeConfig.SUCCESS_URL,
-      cancel_url: stripeConfig.CANCEL_URL
+      cancel_url: stripeConfig.CANCEL_URL,
+      metadata: {
+        userId,
+        plan
+      }
     })
   },
 

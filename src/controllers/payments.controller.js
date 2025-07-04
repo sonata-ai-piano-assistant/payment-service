@@ -11,7 +11,9 @@ const checkoutHandler = async (req, res) => {
     }
     const session = await stripeService.createCheckoutSession({
       priceId,
-      customerEmail: req.user.email
+      customerEmail: req.user.email,
+      userId: req.user.id,
+      plan: type
     })
     res.json({ url: session.url })
   } catch (err) {

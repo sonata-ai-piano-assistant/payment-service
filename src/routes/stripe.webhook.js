@@ -2,11 +2,11 @@ const stripeConfig = require("../config/stripe.config")
 const stripe = require("stripe")(stripeConfig.STRIPE_SECRET_KEY)
 const express = require("express")
 const router = express.Router()
-
+const subscriptionService = require("../services/subscription.service")
 router.post(
   "/webhook",
   express.raw({ type: "application/json" }),
-  (request, response) => {
+  async (request, response) => {
     const sig = request.headers["stripe-signature"]
 
     let event
@@ -26,29 +26,57 @@ router.post(
     switch (event.type) {
       case "checkout.session.completed": {
         const checkoutSessionCompleted = event.data.object
-        // Then define and call a function to handle the event checkout.session.completed
+        const subscriptionData = {
+          user: checkoutSessionCompleted.metadata
+            ? checkoutSessionCompleted.metadata.userId
+            : undefined, // set this in your Stripe session metadata
+          stripeSubscriptionId: checkoutSessionCompleted.subscription,
+          plan: checkoutSessionCompleted.metadata
+            ? checkoutSessionCompleted.metadata.plan
+            : undefined, // set this in your Stripe session metadata
+          status: "active",
+          currentPeriodEnd: checkoutSessionCompleted.current_period_end
+            ? new Date(checkoutSessionCompleted.current_period_end * 1000)
+            : undefined
+        }
+        await subscriptionService.createOrUpdateSubscription(subscriptionData)
         console.log(
-          `Checkout session completed for session ID: ${checkoutSessionCompleted.id}`
+          `Subscription created/updated for user ID: ${subscriptionData.user}`
         )
+
         break
       }
       case "customer.subscription.deleted": {
         const customerSubscriptionDeleted = event.data.object
-        // Then define and call a function to handle the event customer.subscription.deleted
+
+        await subscriptionService.deleteSubscription(
+          customerSubscriptionDeleted.id
+        )
         console.log(
-          `Subscription deleted for customer ID: ${customerSubscriptionDeleted.customer}`
+          `Subscription deleted for subscription ID: ${customerSubscriptionDeleted.id}`
         )
         break
       }
       case "invoice.paid": {
         const invoicePaid = event.data.object
-        // Then define and call a function to handle the event invoice.paid
-        console.log(`Invoice paid for invoice ID: ${invoicePaid.id}`)
+        const subscriptionData = {
+          user: invoicePaid.metadata ? invoicePaid.metadata.userId : undefined, // set this in your Stripe invoice metadata
+          stripeSubscriptionId: invoicePaid.subscription,
+          plan: invoicePaid.metadata ? invoicePaid.metadata.plan : undefined, // set this in your Stripe invoice metadata
+          status: "active",
+          currentPeriodEnd: invoicePaid.period_end
+            ? new Date(invoicePaid.period_end * 1000)
+            : undefined
+        }
+        await subscriptionService.createOrUpdateSubscription(subscriptionData)
+        console.log(
+          `Subscription updated for user ID: ${subscriptionData.user} with subscription ID: ${subscriptionData.stripeSubscriptionId}`
+        )
         break
       }
       case "invoice.upcoming": {
         const invoiceUpcoming = event.data.object
-        // Then define and call a function to handle the event invoice.upcoming
+        // Send an email to the customer to notify them of the upcoming invoice
         console.log(
           `Upcoming invoice for customer ID: ${invoiceUpcoming.customer}`
         )
@@ -56,6 +84,7 @@ router.post(
       }
       case "subscription_schedule.expiring": {
         const subscriptionScheduleExpiring = event.data.object
+        // Send an email to the customer to notify them of the expiring subscription schedule
         console.log(
           `Subscription schedule expiring for schedule ID: ${subscriptionScheduleExpiring.id}`
         )
