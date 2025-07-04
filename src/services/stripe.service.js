@@ -1,6 +1,11 @@
 const Stripe = require("stripe")
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY)
+const stripeConfig = require("../config/stripe.config")
+const stripe = Stripe(stripeConfig.STRIPE_SECRET_KEY)
 
+/**
+ * Stripe service for handling payment operations
+ * @module services/stripe.service
+ */
 module.exports = {
   async createCheckoutSession({ priceId, customerEmail }) {
     return await stripe.checkout.sessions.create({
@@ -8,8 +13,8 @@ module.exports = {
       mode: "subscription",
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: customerEmail,
-      success_url: process.env.SUCCESS_URL,
-      cancel_url: process.env.CANCEL_URL
+      success_url: stripeConfig.SUCCESS_URL,
+      cancel_url: stripeConfig.CANCEL_URL
     })
   },
 

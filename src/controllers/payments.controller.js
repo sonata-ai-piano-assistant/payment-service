@@ -1,10 +1,6 @@
 const stripeService = require("../services/stripe.service")
 
-const priceIdByType = {
-  free: process.env.FREE_SUBSCRIPTION_ID,
-  premium: process.env.PREMIUM_SUBSCRIPTION_ID,
-  pro: process.env.PRO_SUBSCRIPTION_ID
-}
+const { priceIdByType } = require("../config/stripe.config")
 
 const checkoutHandler = async (req, res) => {
   try {
