@@ -13,6 +13,7 @@ app.use(cors())
 const port = envConfig.PORT
 const apiRouter = require("./routes")
 const stripeWebhook = require("./middlewares/stripe.webhook")
+const loggerMiddleware = require("./middlewares/logger.middleware")
 app.post("/webhook", express.raw({ type: "application/json" }), stripeWebhook)
 
 app.use(express.json({ type: "application/json" }))
@@ -22,7 +23,7 @@ initializeMetrics("payment")
 
 // 📊 MIDDLEWARE MÉTRIQUES
 app.use(metricsMiddleware)
-
+app.use(loggerMiddleware)
 // 🛣️ ROUTES MÉTRIQUES
 app.use(metricsRouter)
 app.use("/api", apiRouter)
